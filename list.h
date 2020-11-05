@@ -3,6 +3,7 @@
 
 struct node{
 	struct node *next;
+	struct node *prev;
 	void *p;
 };
 
@@ -16,5 +17,7 @@ struct list *list_create();
 void *list_destroy(struct list *l);
 void *list_get(struct list *l, int index);
 int list_append(struct list *l, void *p);
+void *list_delete(struct list *l, int index);
+void *list_delete_node(struct list *l, struct node *node);
 
 #endif
