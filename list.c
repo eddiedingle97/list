@@ -29,8 +29,6 @@ void *list_destroy(struct list *l)
 
 void *list_get(struct list *l, int index)
 {
-	if(!l)
-		return NULL;
 	if(l->size == 0)
 		return NULL;
 	if(index >= l->size)
@@ -71,7 +69,7 @@ int list_append(struct list *l, void *p)//append to back
 	return l->size - 1;
 }
 
-int list_place(struct list *l, void *p)//place in front
+int list_queue(struct list *l, void *p)//place in front
 {
 	if(l->size == 0)
 	{
@@ -94,10 +92,56 @@ int list_place(struct list *l, void *p)//place in front
 	return l->size - 1;
 }
 
+void *list_dequeue(struct list *l)//remove last element
+{
+	if(l->size == 0)
+		return NULL;
+
+	void *p = l->tail->p;
+
+	
+	l->tail = l->tail->prev;
+
+	if(l->size == 1)
+	{
+		free(l->head);
+		l->head = NULL;
+	}
+	else
+	{
+		free(l->tail->next);
+		l->tail->next = NULL;
+	}
+
+	l->size--;
+	return p;
+}
+
+void *list_pop(struct list *l)//remove first element
+{
+	if(l->size == 0)
+		return NULL;
+
+	void *p = l->head->p;
+
+	l->head = l->head->next;
+	if(l->size == 1)
+	{
+		free(l->tail);
+		l->tail = NULL;
+	}
+	else
+	{
+		free(l->head->prev);
+		l->head->prev = NULL;
+	}
+
+	l->size--;
+	return p;
+}
+
 void *list_delete(struct list *l, int index)
 {
-	if(!l)
-		return NULL;
 	if(l->size == 0)
 		return NULL;
 	if(index >= l->size)
@@ -138,12 +182,19 @@ void *list_delete(struct list *l, int index)
 
 void *list_delete_node(struct list *l, struct node *node)
 {
-	if(node == NULL || l == NULL || l->size == 0)
+	if(node == NULL)
+		return NULL;
+	if(l->size == 0)
 		return NULL;
 
 	void *p = node->p;
 
-	if(l->head == node)
+	if(l->size == 1)
+	{
+		l->head = NULL;
+		l->tail = NULL;
+	}
+	else if(l->head == node)
 	{
 		l->head = node->next;
 		l->head->prev = NULL;

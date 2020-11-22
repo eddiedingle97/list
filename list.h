@@ -17,6 +17,9 @@ struct list *list_create();
 void *list_destroy(struct list *l);
 void *list_get(struct list *l, int index);
 int list_append(struct list *l, void *p);
+int list_queue(struct list *l, void *p);
+void *list_dequeue(struct list *l);
+void *list_pop(struct list *l);
 void *list_delete(struct list *l, int index);
 void *list_delete_node(struct list *l, struct node *node);
 
