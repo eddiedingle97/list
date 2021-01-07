@@ -1,6 +1,6 @@
-#include "list.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "list.h"
 
 struct list *list_create()
 {
@@ -27,6 +27,22 @@ void *list_destroy(struct list *l)
 	return NULL;
 }
 
+void *list_destroy_with_function(struct list *l, void (*destroyfunc)(void *))
+{
+	int i;
+	struct node *temp = l->head;
+	for(i = 0; i < l->size; i++)
+	{
+		destroyfunc(l->head->p);
+		l->head = l->head->next;
+		free(temp);
+		temp = l->head;
+	}
+
+	free(l);
+	return NULL;
+}
+
 void *list_get(struct list *l, int index)
 {
 	if(l->size == 0)
@@ -43,6 +59,24 @@ void *list_get(struct list *l, int index)
 	}
 
 	return temp->p;
+}
+
+struct node *list_get_node(struct list *l, int index)
+{
+	if(l->size == 0)
+		return NULL;
+	if(index >= l->size)
+		return NULL;
+	
+	struct node *temp = l->head;
+
+	int i;
+	for(i = 0; i < index; i++)
+	{
+		temp = temp->next;
+	}
+
+	return temp;
 }
 
 int list_append(struct list *l, void *p)//append to back
@@ -82,6 +116,7 @@ int list_queue(struct list *l, void *p)//place in front
 	{
 		struct node *newhead = malloc(sizeof(struct node));
 		newhead->next = l->head;
+		l->head->prev = newhead;
 		l->head = newhead;
 	}
 
@@ -89,7 +124,31 @@ int list_queue(struct list *l, void *p)//place in front
 	l->head->p = p;
 	l->size++;
 
-	return l->size - 1;
+	return 0;
+}
+
+int list_push(struct list *l, void *p)//place in front
+{
+	if(l->size == 0)
+	{
+		l->head = malloc(sizeof(struct node));
+		l->tail = l->head;
+		l->head->next = NULL;
+	}
+
+	else
+	{
+		struct node *newhead = malloc(sizeof(struct node));
+		newhead->next = l->head;
+		l->head->prev = newhead;
+		l->head = newhead;
+	}
+
+	l->head->prev = NULL;
+	l->head->p = p;
+	l->size++;
+
+	return 0;
 }
 
 void *list_dequeue(struct list *l)//remove last element
@@ -98,7 +157,6 @@ void *list_dequeue(struct list *l)//remove last element
 		return NULL;
 
 	void *p = l->tail->p;
-
 	
 	l->tail = l->tail->prev;
 
@@ -138,6 +196,70 @@ void *list_pop(struct list *l)//remove first element
 
 	l->size--;
 	return p;
+}
+
+void list_swap_node(struct list *l, struct node *one, struct node *two)
+{
+	if(l->size < 2)
+		return;
+	if(!one)
+		return;
+	if(!two)
+		return;
+	if(one == two)
+		return;
+
+	if(one->next == two)
+	{
+		one->next = two->next;
+		two->prev = one->prev;
+		two->next = one;
+		one->prev = two;
+		printf("here\n");
+	}
+
+	else if(two->next == one)
+	{
+		two->next = one->next;
+		one->prev = two->prev;
+		one->next = two;
+		two->prev = one;
+	}
+
+	else
+	{
+		struct node *temp;
+		temp = one->next;
+		one->next = two->next;
+		two->next = temp;
+		temp = one->prev;
+		one->prev = two->prev;
+		two->prev = temp;
+	}
+
+	if(one->prev)
+		one->prev->next = one;
+
+	else
+		l->head = one;
+
+	if(two->prev)
+		two->prev->next = two;
+
+	else
+		l->head = two;
+
+	if(one->next)
+		one->next->prev = one;
+
+	else
+		l->tail = one;
+
+	if(two->next)
+		two->next->prev = two;
+
+	else
+		l->tail = two;
 }
 
 void *list_delete(struct list *l, int index)
