@@ -215,7 +215,6 @@ void list_swap_node(struct list *l, struct node *one, struct node *two)
 		two->prev = one->prev;
 		two->next = one;
 		one->prev = two;
-		printf("here\n");
 	}
 
 	else if(two->next == one)
